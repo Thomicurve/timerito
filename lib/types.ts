@@ -12,3 +12,10 @@ export interface TaskSummaryItem {
   count: number
 }
 
+export interface TaskFormData {
+  name: string
+  description: string
+  hours: number
+  minutes: number
+}
+

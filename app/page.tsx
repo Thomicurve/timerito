@@ -7,7 +7,7 @@ import { WorkHoursSelector } from "@/components/work-hours-selector"
 import { TaskForm } from "@/components/task-form"
 import { TaskList } from "@/components/task-list"
 import { TaskSummary } from "@/components/task-summary"
-import type { Task } from "@/lib/types"
+import type { Task, TaskFormData } from "@/lib/types"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/components/ui/use-toast"
 import { formatTime } from "@/lib/utils"
@@ -22,12 +22,19 @@ export default function TimeTracker() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [remainingHours, setRemainingHours] = useState<number>(workHours)
   const [isAnimating, setIsAnimating] = useState<boolean>(false)
+  const [formData, setFormData] = useState<TaskFormData>({
+    name: "",
+    description: "",
+    hours: 0,
+    minutes: 0
+  })
   const { toast } = useToast()
 
   // Cargar datos del localStorage al iniciar
   useEffect(() => {
     const savedWorkHours = localStorage.getItem("workHours")
     const savedTasks = localStorage.getItem("tasks")
+    const savedFormData = localStorage.getItem("formData")
 
     if (savedWorkHours) {
       setWorkHours(Number(savedWorkHours))
@@ -37,12 +44,17 @@ export default function TimeTracker() {
     if (savedTasks) {
       setTasks(JSON.parse(savedTasks))
     }
+
+    if (savedFormData) {
+      setFormData(JSON.parse(savedFormData))
+    }
   }, [])
 
   // Actualizar localStorage cuando cambian los datos
   useEffect(() => {
     localStorage.setItem("workHours", workHours.toString())
     localStorage.setItem("tasks", JSON.stringify(tasks))
+    localStorage.setItem("formData", JSON.stringify(formData))
 
     const totalHoursSpent = tasks.reduce((total, task) => total + task.timeSpent, 0)
     const newRemainingHours = Math.max(0, workHours - totalHoursSpent)
@@ -55,11 +67,19 @@ export default function TimeTracker() {
         setIsAnimating(false)
       }, 1000)
     }
-  }, [workHours, tasks, remainingHours])
+  }, [workHours, tasks, remainingHours, formData])
 
   const addTask = (task: Task) => {
     const newTask = { ...task, id: Date.now().toString() }
     setTasks([...tasks, newTask])
+
+    // Limpiar formulario después de agregar tarea
+    setFormData({
+      name: "",
+      description: "",
+      hours: 0,
+      minutes: 0
+    })
 
     toast({
       title: "Tarea agregada",
@@ -88,6 +108,19 @@ export default function TimeTracker() {
         variant: "destructive",
       })
     }
+  }
+
+  const deleteAllTasks = () => {
+    setTasks([])
+    toast({
+      title: "Todas las tareas eliminadas",
+      description: "Se han eliminado todas las tareas",
+      variant: "destructive",
+    })
+  }
+
+  const updateFormData = (newFormData: TaskFormData) => {
+    setFormData(newFormData)
   }
 
   return (
@@ -119,14 +152,19 @@ export default function TimeTracker() {
         <TabsContent value="add">
           <Card>
             <CardContent className="pt-6">
-              <TaskForm onAddTask={addTask} />
+              <TaskForm onAddTask={addTask} formData={formData} updateFormData={updateFormData} />
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="list">
           <Card>
             <CardContent className="pt-6">
-              <TaskList tasks={tasks} onUpdateTask={updateTask} onDeleteTask={deleteTask} />
+              <TaskList 
+                tasks={tasks} 
+                onUpdateTask={updateTask} 
+                onDeleteTask={deleteTask} 
+                onDeleteAllTasks={deleteAllTasks} 
+              />
             </CardContent>
           </Card>
         </TabsContent>

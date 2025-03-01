@@ -47,22 +47,22 @@
   .dark {
     --background: 240 95% 4%;
     --foreground: 0 0% 98%;
-    --card: #1a1c2b;
-    --card-foreground: 0 0% 98%;
+    --card: 237, 29%, 15%;
+    --card-foreground: #1c1d33;
     --popover: #1a1c2b;
     --popover-foreground: 0 0% 98%;
     --primary: 250 67% 54%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 70% 10%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 70% 10%;
+    --muted: 237, 29%, 15%;
     --muted-foreground: 0 0% 63.9%;
     --accent: 250 67% 54%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 70% 14%;
-    --input: 240 70% 14%;
+    --border: 240, 23%, 24%;
+    --input: 240, 23%, 24%;
     --ring: 250 67% 54%;
     --chart-1: 250 67% 54%;
     --chart-2: 160 60% 45%;
@@ -87,4 +87,12 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.dark .inset-shadow {
+  box-shadow: inset 0px 0px 10px #2f2f4a;
+}
+
+.light .inset-shadow {
+  box-shadow: inset 0px 0px 10px #e2e2ff;
 }

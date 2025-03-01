@@ -2,28 +2,27 @@
 
 import type React from "react"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import type { Task } from "@/lib/types"
+import type { Task, TaskFormData } from "@/lib/types"
 import { Plus, Minus } from "lucide-react"
 
 interface TaskFormProps {
   onAddTask: (task: Task) => void
+  formData: TaskFormData
+  updateFormData: (formData: TaskFormData) => void
 }
 
-export function TaskForm({ onAddTask }: TaskFormProps) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [hours, setHours] = useState(0)
-  const [minutes, setMinutes] = useState(0)
+export function TaskForm({ onAddTask, formData, updateFormData }: TaskFormProps) {
+  const { name, description, hours, minutes } = formData
+  const isFormValid = name.trim() !== "" && (hours > 0 || minutes > 0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name || (hours === 0 && minutes === 0)) {
+    if (!isFormValid) {
       return
     }
 
@@ -36,46 +35,61 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
       timeSpent,
       date: new Date().toISOString().split("T")[0],
     })
-
-    // Limpiar formulario
-    setName("")
-    setDescription("")
-    setHours(0)
-    setMinutes(0)
   }
 
   const incrementHours = () => {
-    setHours((prev) => Math.min(prev + 1, 12))
+    updateFormData({
+      ...formData,
+      hours: Math.min(hours + 1, 12)
+    })
   }
 
   const decrementHours = () => {
-    setHours((prev) => Math.max(prev - 1, 0))
+    updateFormData({
+      ...formData,
+      hours: Math.max(hours - 1, 0)
+    })
   }
 
   const incrementMinutes = () => {
     if (minutes === 55) {
-      setMinutes(0)
-      incrementHours()
+      updateFormData({
+        ...formData,
+        minutes: 0,
+        hours: Math.min(hours + 1, 12)
+      })
     } else {
-      setMinutes((prev) => prev + 5)
+      updateFormData({
+        ...formData,
+        minutes: minutes + 5
+      })
     }
   }
 
   const decrementMinutes = () => {
     if (minutes === 0) {
       if (hours > 0) {
-        setMinutes(55)
-        decrementHours()
+        updateFormData({
+          ...formData,
+          minutes: 55,
+          hours: hours - 1
+        })
       }
     } else {
-      setMinutes((prev) => prev - 5)
+      updateFormData({
+        ...formData,
+        minutes: minutes - 5
+      })
     }
   }
 
   const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value === "" ? 0 : Number.parseInt(e.target.value, 10)
     if (!isNaN(value) && value >= 0 && value <= 12) {
-      setHours(value)
+      updateFormData({
+        ...formData,
+        hours: value
+      })
     }
   }
 
@@ -83,7 +97,10 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
     const value = e.target.value === "" ? 0 : Number.parseInt(e.target.value, 10)
     if (!isNaN(value) && value >= 0 && value <= 59) {
       // Redondear a múltiplos de 5
-      setMinutes(Math.round(value / 5) * 5)
+      updateFormData({
+        ...formData,
+        minutes: Math.round(value / 5) * 5
+      })
     }
   }
 
@@ -94,7 +111,7 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
         <Input
           id="task-name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => updateFormData({ ...formData, name: e.target.value })}
           placeholder="Ej: Reunión con cliente"
           required
         />
@@ -105,7 +122,7 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
         <Textarea
           id="task-description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => updateFormData({ ...formData, description: e.target.value })}
           placeholder="Detalles adicionales sobre la tarea"
           rows={3}
         />
@@ -154,7 +171,7 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
         </div>
       </div>
 
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={!isFormValid}>
         Agregar Tarea
       </Button>
     </form>

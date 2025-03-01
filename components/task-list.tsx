@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Edit, Trash2, Plus, Minus } from "lucide-react"
+import { Edit, Trash2, Plus, Minus, Trash } from "lucide-react"
 import type { Task } from "@/lib/types"
 import { Label } from "@/components/ui/label"
 
@@ -27,15 +27,17 @@ interface TaskListProps {
   tasks: Task[]
   onUpdateTask: (task: Task) => void
   onDeleteTask: (taskId: string) => void
+  onDeleteAllTasks: () => void
 }
 
-export function TaskList({ tasks, onUpdateTask, onDeleteTask }: TaskListProps) {
+export function TaskList({ tasks, onUpdateTask, onDeleteTask, onDeleteAllTasks }: TaskListProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [editName, setEditName] = useState("")
   const [editDescription, setEditDescription] = useState("")
   const [editHours, setEditHours] = useState(0)
   const [editMinutes, setEditMinutes] = useState(0)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
 
   const handleEdit = (task: Task) => {
     setEditingTask(task)
@@ -54,6 +56,11 @@ export function TaskList({ tasks, onUpdateTask, onDeleteTask }: TaskListProps) {
       onDeleteTask(taskToDelete)
       setTaskToDelete(null)
     }
+  }
+
+  const handleDeleteAllConfirm = () => {
+    onDeleteAllTasks()
+    setShowDeleteAllDialog(false)
   }
 
   const incrementEditHours = () => {
@@ -127,6 +134,31 @@ export function TaskList({ tasks, onUpdateTask, onDeleteTask }: TaskListProps) {
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">
+              <Trash className="h-4 w-4 mr-2" />
+              Eliminar todas las tareas
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta acción eliminará todas las tareas y no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteAllConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Eliminar todas
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
