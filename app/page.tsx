@@ -123,6 +123,12 @@ export default function TimeTracker() {
     setFormData(newFormData)
   }
 
+  const formatRemainingTime = (hours: number) => {
+    const wholeHours = Math.floor(hours)
+    const minutes = Math.round((hours - wholeHours) * 60)
+    return `${wholeHours}.${minutes.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className={`container mx-auto py-6 space-y-6 ${inter.className}`}>
       <Card>
@@ -136,7 +142,7 @@ export default function TimeTracker() {
               isAnimating ? "scale-110 text-primary" : ""
             }`}
           >
-            {remainingHours.toFixed(2)}h
+            {formatRemainingTime(remainingHours)}h
           </div>
           <p className="text-muted-foreground">Horas restantes de {workHours}h laborales</p>
           <WorkHoursSelector workHours={workHours} setWorkHours={setWorkHours} />
